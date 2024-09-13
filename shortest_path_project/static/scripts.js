@@ -5,6 +5,7 @@ let mode = 'none';  // Modes: 'obstacle', 'room', 'start', 'end'
 let startRoom = null;
 let endRoom = null;
 let placedRooms = [];
+let liftStairs = [];
 
 // Initialize grid
 for (let i = 0; i < rows * cols; i++) {
@@ -28,6 +29,7 @@ function setMode(selectedMode) {
     mode = selectedMode;
     document.getElementById('place-obstacles').disabled = (mode === 'obstacle');
     document.getElementById('place-rooms').disabled = (mode === 'room');
+    document.getElementById('select-lift').disabled = (mode === 'lift');
     updateButtonStates();
 }
 
@@ -68,6 +70,18 @@ function cellClicked(index) {
         cell.classList.add('end');
         // Update button states
         updateButtonStates();
+
+    } else if (mode === 'lift') {
+        // Toggle lift/stairs
+        if (cell.classList.contains('lift')) {
+            cell.classList.remove('lift');
+            liftStairs = liftStairs.filter(lift => lift !== index);
+        } else {
+            cell.classList.add('lift');
+            liftStairs.push(index);
+        }
+        // Update button states
+        updateButtonStates();
     }
 }
 
@@ -77,16 +91,21 @@ function findShortestPath() {
         return;
     }
 
-    // Collect obstacles
+    // Collect obstacles (including rooms and lifts that aren't start or end points)
     const obstacles = [];
     document.querySelectorAll('.cell.obstacle').forEach(cell => {
         obstacles.push(parseInt(cell.dataset.index, 10));
     });
 
-    // Treat all rooms except start and end as obstacles
-    placedRooms.forEach(room => {
-        if (room !== startRoom && room !== endRoom) {
-            obstacles.push(room);
+    // Add rooms and lifts as obstacles if they are not start or end points
+    placedRooms.forEach(index => {
+        if (index !== startRoom && index !== endRoom) {
+            obstacles.push(index);
+        }
+    });
+    liftStairs.forEach(index => {
+        if (index !== startRoom && index !== endRoom) {
+            obstacles.push(index);
         }
     });
 

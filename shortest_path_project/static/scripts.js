@@ -83,6 +83,13 @@ function findShortestPath() {
         obstacles.push(parseInt(cell.dataset.index, 10));
     });
 
+    // Treat all rooms except start and end as obstacles
+    placedRooms.forEach(room => {
+        if (room !== startRoom && room !== endRoom) {
+            obstacles.push(room);
+        }
+    });
+
     fetch('/path', {
         method: 'POST',
         headers: {

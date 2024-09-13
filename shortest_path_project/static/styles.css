@@ -1,3 +1,8 @@
+.grid-container {
+    display: inline-block;
+    margin-right: 50px;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(10, 50px);
@@ -18,7 +23,9 @@
 }
 
 .room { background-color: lightblue; }
+.lift { background-color: lightpink; }
 .obstacle { background-color: gray; }
 .path { background-color: lightgreen; }
 .start { background-color: lightcoral; }
 .end { background-color: lightgoldenrodyellow; }
+

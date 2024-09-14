@@ -1,46 +1,40 @@
-const grids = {
-    ground: document.getElementById('ground-grid'),
-    next: document.getElementById('next-grid'),
-};
-
+const grids = ['grid1', 'grid2'];
 const rows = 10;
 const cols = 10;
-let mode = 'none';  
-let startRoom = { ground: null, next: null };
-let endRoom = { ground: null, next: null };
-let placedRooms = { ground: [], next: [] };
-let placedLifts = { ground: [], next: [] };
+let mode = 'none';  // Modes: 'obstacle', 'room', 'start', 'end', 'lift'
+let startRoom = { grid1: null, grid2: null };
+let endRoom = { grid1: null, grid2: null };
+let placedRooms = { grid1: [], grid2: [] };
+let placedLifts = { grid1: [], grid2: [] };
 
 // Initialize grids
-Object.keys(grids).forEach(gridId => {
+grids.forEach(gridId => {
+    const gridElement = document.getElementById(gridId);
     for (let i = 0; i < rows * cols; i++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
         cell.dataset.index = i;
         cell.dataset.grid = gridId;
         cell.addEventListener('click', () => cellClicked(i, gridId));
-        grids[gridId].appendChild(cell);
+        gridElement.appendChild(cell);
     }
 });
 
-// Function to update button states for the selected grid
-function updateButtonStates(gridId) {
-    const canSelect = placedRooms[gridId].length >= 2;
-    document.getElementById(`${gridId}-select-start`).disabled = !canSelect;
-    document.getElementById(`${gridId}-select-end`).disabled = !canSelect || startRoom[gridId] === null;
-    document.getElementById(`${gridId}-find-path`).disabled = !canSelect || startRoom[gridId] === null || endRoom[gridId] === null;
+function updateButtonStates() {
+    const canSelect = Object.values(placedRooms).some(rooms => rooms.length >= 2) || Object.values(placedLifts).some(lifts => lifts.length >= 2);
+    document.getElementById('select-start').disabled = !canSelect;
+    document.getElementById('select-end').disabled = !canSelect || Object.values(startRoom).every(room => room === null);
+    document.getElementById('find-path').disabled = !canSelect || Object.values(startRoom).every(room => room === null) || Object.values(endRoom).every(room => room === null);
 }
 
-// Set the mode and update button states accordingly for the specific grid
-function setMode(selectedMode, gridId) {
+function setMode(selectedMode) {
     mode = selectedMode;
-    document.getElementById(`${gridId}-place-obstacles`).disabled = (mode === 'obstacle');
-    document.getElementById(`${gridId}-place-rooms`).disabled = (mode === 'room');
-    document.getElementById(`${gridId}-place-lift`).disabled = (mode === 'lift');
-    updateButtonStates(gridId);
+    ['place-obstacles', 'place-rooms', 'place-lift'].forEach(button => {
+        document.getElementById(button).disabled = (mode === button.split('-')[1]);
+    });
+    updateButtonStates();
 }
 
-// When a cell is clicked in either grid
 function cellClicked(index, gridId) {
     const cell = document.querySelector(`.cell[data-index="${index}"][data-grid="${gridId}"]`);
 
@@ -54,39 +48,8 @@ function cellClicked(index, gridId) {
             cell.classList.add('room');
             placedRooms[gridId].push(index);
         }
-        updateButtonStates(gridId);
-    } else if (mode === 'start') {
-        // Remove previous start class
-        if (startRoom[gridId] !== null) {
-            const prevStart = document.querySelector(`.cell[data-index="${startRoom[gridId]}"][data-grid="${gridId}"]`);
-            prevStart.classList.remove('start');
-            // Restore 'lift' class if the previous start was a lift
-            if (placedLifts[gridId].includes(startRoom[gridId])) {
-                prevStart.classList.add('lift');
-            }
-        }
-        // Set new start
-        startRoom[gridId] = index;
-        cell.classList.add('start');
-        cell.classList.remove('lift'); // Ensure lift class is removed
-        updateButtonStates(gridId);
-    } else if (mode === 'end') {
-        // Remove previous end class
-        if (endRoom[gridId] !== null) {
-            const prevEnd = document.querySelector(`.cell[data-index="${endRoom[gridId]}"][data-grid="${gridId}"]`);
-            prevEnd.classList.remove('end');
-            // Restore 'lift' class if the previous end was a lift
-            if (placedLifts[gridId].includes(endRoom[gridId])) {
-                prevEnd.classList.add('lift');
-            }
-        }
-        // Set new end
-        endRoom[gridId] = index;
-        cell.classList.add('end');
-        cell.classList.remove('lift'); // Ensure lift class is removed
-        updateButtonStates(gridId);
+        updateButtonStates();
     } else if (mode === 'lift') {
-        // Toggle lift class
         if (cell.classList.contains('lift')) {
             cell.classList.remove('lift');
             placedLifts[gridId] = placedLifts[gridId].filter(lift => lift !== index);
@@ -94,10 +57,43 @@ function cellClicked(index, gridId) {
             cell.classList.add('lift');
             placedLifts[gridId].push(index);
         }
+        updateButtonStates();
+    } else if (mode === 'start') {
+        if (!cell.classList.contains('room') && !cell.classList.contains('lift')) {
+            alert('Please select a valid room or lift as the start.');
+            return;
+        }
+        if (startRoom[gridId] !== null) {
+            const prevStart = document.querySelector(`.cell[data-index="${startRoom[gridId]}"][data-grid="${gridId}"]`);
+            prevStart.classList.remove('start');
+            if (placedLifts[gridId].includes(startRoom[gridId])) {
+                prevStart.classList.add('lift');
+            }
+        }
+        startRoom[gridId] = index;
+        cell.classList.add('start');
+        cell.classList.remove('lift');
+        updateButtonStates();
+    } else if (mode === 'end') {
+        if (!cell.classList.contains('room') && !cell.classList.contains('lift')) {
+            alert('Please select a valid room or lift as the end.');
+            return;
+        }
+        if (endRoom[gridId] !== null) {
+            const prevEnd = document.querySelector(`.cell[data-index="${endRoom[gridId]}"][data-grid="${gridId}"]`);
+            prevEnd.classList.remove('end');
+            if (placedLifts[gridId].includes(endRoom[gridId])) {
+                prevEnd.classList.add('lift');
+            }
+        }
+        endRoom[gridId] = index;
+        cell.classList.add('end');
+        cell.classList.remove('lift');
+        updateButtonStates();
     }
 }
 
-// Function to find the shortest path in a specific grid
+// Pathfinding for a specific grid
 function findShortestPath(gridId) {
     if (startRoom[gridId] === null || endRoom[gridId] === null) {
         alert('Please select both start and end rooms.');
@@ -122,7 +118,7 @@ function findShortestPath(gridId) {
         }
     });
 
-    // Pass grid-specific data to the backend
+    // Pass grid-specific data to the backend or handle pathfinding here
     fetch('/path', {
         method: 'POST',
         headers: {
@@ -140,6 +136,22 @@ function findShortestPath(gridId) {
     .catch(error => console.error('Error:', error));
 }
 
-// Initialize both grids
-updateButtonStates('ground');
-updateButtonStates('next');
+// Common pathfinding for both grids
+function findPathForBothGrids() {
+    if (startRoom['grid1'] === null || endRoom['grid1'] === null || startRoom['grid2'] === null || endRoom['grid2'] === null) {
+        alert('Please select start and end points on both grids.');
+        return;
+    }
+
+    // Find path for grid1
+    findShortestPath('grid1');
+    
+    // Find path for grid2
+    findShortestPath('grid2');
+}
+
+// Add event listener for common pathfinding button
+document.getElementById('find-path').addEventListener('click', findPathForBothGrids);
+
+// Initial state: disable certain buttons
+updateButtonStates();

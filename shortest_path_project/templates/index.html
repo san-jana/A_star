@@ -8,34 +8,19 @@
 </head>
 <body>
     <h1>Shortest Path Finder</h1>
-    
-    <!-- Container for both grids -->
-    <div class="grid-container">
-        <!-- Ground floor grid -->
-        <div>
-            <h2>Ground Floor</h2>
-            <div class="grid" id="ground-grid"></div>
-            <button id="ground-place-obstacles" onclick="setMode('obstacle', 'ground')">Place Obstacles</button>
-            <button id="ground-place-rooms" onclick="setMode('room', 'ground')">Place Rooms</button>
-            <button id="ground-select-start" onclick="setMode('start', 'ground')">Select Start Room</button>
-            <button id="ground-select-end" onclick="setMode('end', 'ground')">Select End Room</button>
-            <button id="ground-place-lift" onclick="setMode('lift', 'ground')">Place Lift/Stairs</button>
-            <button id="ground-find-path" onclick="findShortestPath('ground')">Find Shortest Path</button>
-        </div>
-        
-        <!-- Next floor grid -->
-        <div>
-            <h2>Next Floor</h2>
-            <div class="grid" id="next-grid"></div>
-            <button id="next-place-obstacles" onclick="setMode('obstacle', 'next')">Place Obstacles</button>
-            <button id="next-place-rooms" onclick="setMode('room', 'next')">Place Rooms</button>
-            <button id="next-select-start" onclick="setMode('start', 'next')">Select Start Room</button>
-            <button id="next-select-end" onclick="setMode('end', 'next')">Select End Room</button>
-            <button id="next-place-lift" onclick="setMode('lift', 'next')">Place Lift/Stairs</button>
-            <button id="next-find-path" onclick="findShortestPath('next')">Find Shortest Path</button>
-        </div>
+    <div class="buttons">
+        <button id="place-obstacles" onclick="setMode('obstacle')">Place Obstacles</button>
+        <button id="place-rooms" onclick="setMode('room')">Place Rooms</button>
+        <button id="select-start" onclick="setMode('start')">Select Start Room</button>
+        <button id="select-end" onclick="setMode('end')">Select End Room</button>
+        <button id="place-lift" onclick="setMode('lift')">Place Lift/Stairs</button>
+        <button id="find-path" onclick="findShortestPath()">Find Path</button>
     </div>
 
+    <div class="grids-container">
+        <div class="grid" id="grid1"></div>
+        <div class="grid" id="grid2"></div>
+    </div>
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>

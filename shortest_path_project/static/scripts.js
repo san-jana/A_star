@@ -20,11 +20,12 @@ grids.forEach(gridId => {
     }
 });
 
+// Modify button state logic to allow selecting end room without a start room
 function updateButtonStates() {
     const canSelect = Object.values(placedRooms).some(rooms => rooms.length >= 2) || Object.values(placedLifts).some(lifts => lifts.length >= 2);
     document.getElementById('select-start').disabled = !canSelect;
-    document.getElementById('select-end').disabled = !canSelect || Object.values(startRoom).every(room => room === null);
-    document.getElementById('find-path').disabled = !canSelect || Object.values(startRoom).every(room => room === null) || Object.values(endRoom).every(room => room === null);
+    document.getElementById('select-end').disabled = !canSelect;
+    document.getElementById('find-path').disabled = Object.values(startRoom).every(room => room === null) && Object.values(endRoom).every(room => room === null);
 }
 
 function setMode(selectedMode) {
@@ -35,6 +36,7 @@ function setMode(selectedMode) {
     updateButtonStates();
 }
 
+// Update cellClicked function to update the state even if only the end room is selected first
 function cellClicked(index, gridId) {
     const cell = document.querySelector(`.cell[data-index="${index}"][data-grid="${gridId}"]`);
 
@@ -95,11 +97,71 @@ function cellClicked(index, gridId) {
 
 // Pathfinding for a specific grid
 function findShortestPath(gridId) {
-    if (startRoom[gridId] === null || endRoom[gridId] === null) {
-        alert('Please select both start and end rooms.');
+    // If both start and end points are selected, continue as usual
+    if (startRoom[gridId] !== null && endRoom[gridId] !== null) {
+        findPath(gridId);
         return;
     }
 
+    // If start or end room is missing, attempt to auto-assign to nearest lift/stair
+    if (startRoom[gridId] === null || endRoom[gridId] === null) {
+        if (placedLifts[gridId].length === 0) {
+            alert(`No lifts/stairs on ${gridId}. Path cannot be found.`);
+            return;
+        }
+
+        // If start room is missing, assign it to the nearest lift/stair
+        if (startRoom[gridId] === null) {
+            startRoom[gridId] = findNearestLiftOrStair(gridId, endRoom[gridId]);
+            if (startRoom[gridId] === null) {
+                alert(`No valid path found on ${gridId}.`);
+                return;
+            } else {
+                document.querySelector(`.cell[data-index="${startRoom[gridId]}"][data-grid="${gridId}"]`).classList.add('start');
+            }
+        }
+
+        // If end room is missing, assign it to the nearest lift/stair
+        if (endRoom[gridId] === null) {
+            endRoom[gridId] = findNearestLiftOrStair(gridId, startRoom[gridId]);
+            if (endRoom[gridId] === null) {
+                alert(`No valid path found on ${gridId}.`);
+                return;
+            } else {
+                document.querySelector(`.cell[data-index="${endRoom[gridId]}"][data-grid="${gridId}"]`).classList.add('end');
+            }
+        }
+    }
+
+    // Once the missing start or end room is filled, proceed with pathfinding
+    findPath(gridId);
+}
+
+function findNearestLiftOrStair(gridId, fromIndex) {
+    // Use a simple BFS or any shortest path algorithm to find the nearest lift/stair
+    let minDistance = Infinity;
+    let nearestLiftOrStair = null;
+
+    placedLifts[gridId].forEach(liftIndex => {
+        const distance = calculateManhattanDistance(fromIndex, liftIndex);
+        if (distance < minDistance) {
+            minDistance = distance;
+            nearestLiftOrStair = liftIndex;
+        }
+    });
+
+    return nearestLiftOrStair;
+}
+
+function calculateManhattanDistance(index1, index2) {
+    const x1 = index1 % cols;
+    const y1 = Math.floor(index1 / cols);
+    const x2 = index2 % cols;
+    const y2 = Math.floor(index2 / cols);
+    return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+}
+
+function findPath(gridId) {
     const obstacles = [];
     document.querySelectorAll(`.cell.obstacle[data-grid="${gridId}"]`).forEach(cell => {
         obstacles.push(parseInt(cell.dataset.index, 10));
@@ -118,7 +180,7 @@ function findShortestPath(gridId) {
         }
     });
 
-    // Pass grid-specific data to the backend or handle pathfinding here
+    // Send grid data to the backend or handle pathfinding here
     fetch('/path', {
         method: 'POST',
         headers: {
@@ -136,19 +198,12 @@ function findShortestPath(gridId) {
     .catch(error => console.error('Error:', error));
 }
 
+
 // Common pathfinding for both grids
 function findPathForBothGrids() {
-    if (startRoom['grid1'] === null || endRoom['grid1'] === null || startRoom['grid2'] === null || endRoom['grid2'] === null) {
-        alert('Please select start and end points on both grids.');
-        return;
-    }
-
-    // Find path for grid1
-    findShortestPath('grid1');
-    
-    // Find path for grid2
-    findShortestPath('grid2');
+    grids.forEach(gridId => findShortestPath(gridId));
 }
+
 
 // Add event listener for common pathfinding button
 document.getElementById('find-path').addEventListener('click', findPathForBothGrids);

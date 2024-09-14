@@ -1,0 +1,5 @@
+Changes:
+>> Using lift/stairs as start/end point if either end/start input is missing; for both grids.
+Constraints:
+Minimum one lift(or both start and end points) must be present for the path to be found, else prompts user.
+Both grids should have a start and end point(or a lift cell to replace either start/end on each grid) for the path to be found.

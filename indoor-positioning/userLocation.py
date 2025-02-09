@@ -7,7 +7,7 @@ import wifiFingerprints as wf
 def get_one_best_pos(positions, r,c):
     ''' For a select list of cells on a rxc grid, find the (approximate centroid(goal) -> perfect pos) one average position.
     
-    // to find centrid consider a square of length one around the point, and return highest freq point/s that the square covers.
+    // to find centroid consider a square of length one around the point, and return highest freq point/s that the square covers.
     '''
     
     final_pos =[]
@@ -42,7 +42,7 @@ def get_one_best_pos(positions, r,c):
     
     return best_pos
 
-def find_location(in_signal, signal_map, ap_pos, grid_size):
+def find_location(in_signal, grid_size, signal_map = wf.cell_signal, ap_pos = wf.ap_pos):
     ''' Given the input strength signals for all 'n' access points in the format [AP1,AP2,AP3,AP4],
     function returns the cell number (on one-dim grid) a user is at currrently.
     '''
@@ -79,9 +79,9 @@ def find_location(in_signal, signal_map, ap_pos, grid_size):
         
     return single_best_pos
     
-if __name__ == "__main__":
-    user_input = [40,40,2,2]
-    grid_size = [5,5]
+# if __name__ == "__main__":
+#     user_input = [40,40,2,2]
+#     grid_size = [5,5]
 
-    result = find_location(user_input, wf.cell_signal, wf.ap_pos, grid_size)
-    print(result)
+# result = find_location(user_input, grid_size)
+# print(result)

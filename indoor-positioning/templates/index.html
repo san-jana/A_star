@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temp</title>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <button id = "userInputButton">User Signals</button>
+    <form id = "inputForm" action = "/" method = "post">
+        <div>
+            <label for= "ap1">AP 1:</label>
+            <input type="number" id="ap1" name="ap1" value = "0">
+        </div>
+        <div>
+            <label for= "ap2">AP 2:</label>
+            <input type="number" id="ap2" name="ap2" value = "0">
+        </div>
+        <div>
+            <label for= "ap3">AP 3:</label>
+            <input type="number" id="ap3" name="ap3" value = "0">
+        </div>
+        <div>
+            <label for= "ap4">AP 4:</label>
+            <input type="number" id="ap4" name="ap4" value = "0">
+        </div>
+
+        <p>*AP - Access point</p>
+        <button type="submit">Submit</button>
+    
+    </form>
+
+    <div id = "result">
+        {%if showResult%}
+            {%if result%}
+            <p>User's live location: {{result}}</p>
+            {%endif%}
+        {%endif%}
+    </div>
+
+
+    <script src = scripts.js></script>
+</body>
+
+</html>

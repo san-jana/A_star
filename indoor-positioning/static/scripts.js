@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+// document.addEventListener("DOMContentLoaded", function() {
     const inputButton = document.getElementById("userInputButton");
     const inputForm = document.getElementById("inputForm");
 
@@ -13,4 +13,4 @@ document.addEventListener("DOMContentLoaded", function() {
     } else {
         console.error("Button or form not found in the DOM.");
     }
-});
+// });

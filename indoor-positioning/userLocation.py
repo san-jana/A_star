@@ -3,6 +3,31 @@ import math
 from collections import defaultdict
 import wifiFingerprints as wf
 
+def get_floor(index,row,col,max_floor):
+    ''' given an index and the dimensions of the grid, determines the floor the index is in
+        max_floor is the total number of floors in the building, 0 refers to only ground floor.
+    '''
+#    only ground floor,
+    if max_floor == 0:
+        return 0
+    
+    dim = row*col
+    floor = 0
+    
+    for i in range(1,max_floor):
+        print(i*dim)
+        if index<= i*dim:
+            break
+        
+        else:
+            floor+=1
+    
+    if floor > max_floor:
+        return "Invalid index"
+            
+    return floor
+            
+
 
 def get_one_best_pos(positions, r,c):
     ''' For a select list of cells on a rxc grid, find the (approximate centroid(goal) -> perfect pos) one average position.

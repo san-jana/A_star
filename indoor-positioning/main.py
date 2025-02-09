@@ -15,8 +15,8 @@ def index():
             ap2 = float(request.form['ap2'])
             ap3 = float(request.form['ap3'])
             ap4 = float(request.form['ap4'])
-            # result = userLocation.find_location([ap1,ap2,ap3,ap4],[5,5])
-            result = ap1+ap2+ap3+ap4
+            result = userLocation.find_location([ap1,ap2,ap3,ap4],[5,5])
+            # result = ap1+ap2+ap3+ap4
             showResult = True
         except ValueError:
             result = "Invalid input. Please enter numbers."

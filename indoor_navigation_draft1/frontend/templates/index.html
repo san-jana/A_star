@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shortest Path Finder</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <h1>Shortest Path Finder</h1>
+
+    <button onclick="sameFloorNav()">Navigate between Same Floors</button>
+    <button onclick="multiFloorNav()">Navigate between Multiple Floors</button>
+
+    <!-- Samefloor Selection -->
+    <div id="same-floor-nav">
+      <div class="floor-selection">
+        <label for="same-floor-select">Source and Destination Floor:</label>
+        <select id="same-floor-select" onchange="updateSameFloor()">
+          <option value="" disabled selected>Select a floor</option>
+          <option value="1">Floor 1</option>
+          <option value="2">Floor 2</option>
+          <option value="3">Floor 3</option>
+          <option value="4">Floor 4</option>
+          <option value="5">Floor 5</option>
+          <option value="6">Floor 6</option>
+          <option value="7">Floor 7</option>
+          <option value="8">Floor 8</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Multifloor Selection -->
+    <div id="multi-floor-nav">
+      <!-- Floor Selection Dropdowns -->
+      <div class="floor-selection">
+        <label for="ground-floor-select">Starting Floor:</label>
+        <select id="ground-floor-select" onchange="updateFloor()">
+          <option value="" disabled selected>Select a floor</option>
+          <option value="1">Floor 1</option>
+          <option value="2">Floor 2</option>
+          <option value="3">Floor 3</option>
+          <option value="4">Floor 4</option>
+          <option value="5">Floor 5</option>
+          <option value="6">Floor 6</option>
+          <option value="7">Floor 7</option>
+          <option value="8">Floor 8</option>
+        </select>
+
+        <label for="first-floor-select">Destination Floor:</label>
+        <select id="first-floor-select" onchange="updateFloor()">
+          <option value="" disabled selected>Select a floor</option>
+          <option value="1">Floor 1</option>
+          <option value="2">Floor 2</option>
+          <option value="3">Floor 3</option>
+          <option value="4">Floor 4</option>
+          <option value="5">Floor 5</option>
+          <option value="6">Floor 6</option>
+          <option value="7">Floor 7</option>
+          <option value="8">Floor 8</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Room Selection Dropdowns -->
+    <div id="room-selection">
+      <label for="start-room-select">Select Start Room:</label>
+      <select id="start-room-select">
+        <option value="" disabled selected>Select a room</option>
+      </select>
+
+      <label for="end-room-select">Select End Room:</label>
+      <select id="end-room-select">
+        <option value="" disabled selected>Select a room</option>
+      </select>
+    </div>
+
+    <!-- Floors Display -->
+    <div id="floors">
+      <div class="floors">
+        <div class="floor" id="ground-floor">
+          <h2>Ground Floor</h2>
+          <div class="grid" id="grid-ground"></div>
+        </div>
+        <div class="floor" id="first-floor">
+          <h2>First Floor</h2>
+          <div class="grid" id="grid-first"></div>
+        </div>
+      </div>
+
+      <!-- Buttons for Interaction -->
+      <button
+        id="select-start"
+        onclick="setMode('start')"
+        title="Click to select the start room"
+      >
+        Select Start Room
+      </button>
+      <button
+        id="select-end"
+        onclick="setMode('end')"
+        title="Click to select the end room"
+      >
+        Select End Room
+      </button>
+      <button
+        id="find-path"
+        onclick="findShortestPath()"
+        disabled
+        title="Click to find the shortest path"
+      >
+        Find Shortest Path
+      </button>
+    </div>
+
+    <!-- Heading Section -->
+    <h1>Router Signal Strength:</h1>
+    <p>Please enter the signal strength in (%):</p>
+
+    <!-- Taking user input for signal strength -->
+    <form id="dataForm">
+      <label for="field1">Router 1:</label>
+      <input type="text" id="field1" name="field1" required /><br /><br />
+
+      <label for="field2">Router 2:</label>
+      <input type="text" id="field2" name="field2" required /><br /><br />
+
+      <label for="field3">Router 3:</label>
+      <input type="text" id="field3" name="field3" required /><br /><br />
+
+      <label for="field4">Router 4:</label>
+      <input type="text" id="field4" name="field4" required /><br /><br />
+
+      <button type="submit">Submit</button>
+    </form>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+  </body>
+</html>

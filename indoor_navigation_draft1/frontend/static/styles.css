@@ -1,41 +1,248 @@
-.floors {
+/* Nav Button Section */
+.nav-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-top: 50px;
+  /* flex-wrap: wrap; */
+}
+
+.nav-select-btn {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.floor-selection, #room-selection{
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #357ab7;
+  transform: scale(1.05);
+}
+
+button:disabled {
+  background-color: #b0b0b0;
+  cursor: not-allowed;
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(9, 32, 77, 0.8);
+}
+
+/* Floor Selection Section */
+#same-floor-nav,
+#multi-floor-nav,
+#room-selection {
+  display: none;
+}
+
+#room-selection {
+  margin-top: 10px;
+}
+
+label {
+  font-weight: bold;
+  color: #555;
+}
+
+select {
+  padding: 8px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: white;
+  transition: border-color 0.3s ease;
+}
+
+select:hover,
+select:focus {
+  border-color: #4a90e2;
+}
+
+/* sssssssssssssssss */
+.floors,
+.dataForm {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 50px;
+  margin-bottom: 40px;
+}
+
+.all-btn {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
 }
 
 .floor {
-    border: 1px solid #ccc;
-    padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  padding: 10px;
+  text-align: center;
+  padding-inline: 20px;
+  padding-bottom: 20px;
 }
 
-#floors, #same-floor-nav, #multi-floor-nav, #room-selection{
-    display: none;
+h5 {
+  font-size: 2rem;
+  color: #1a1d20;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.5rem;
+  color: #df4869;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#floors,
+#same-floor-nav,
+#multi-floor-nav,
+#room-selection {
+  display: none;
 }
 
 .grid {
-    display: grid;
-    grid-template-columns: repeat(10, 50px);
-    grid-template-rows: repeat(10, 50px);
-    gap: 1px;
+  display: grid;
+  grid-template-columns: repeat(10, 50px);
+  grid-template-rows: repeat(10, 50px);
+  gap: 2px;
 }
 
+/* Floor Display Section */
 .cell {
-    width: 50px;
-    height: 50px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    cursor: pointer;
+  width: 50px;
+  height: 50px;
+  border: 1px solid #a7a4a4;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
 }
 
-.room { background-color: rgb(57, 204, 254); }
-.obstacle { background-color: gray; }
-.lift { background-color: rgb(252, 68, 98); }
-.stairs { background-color: lightpink; }
-.path { background-color: rgb(112, 239, 112); }
-.start { background-color: rgb(244, 117, 214); }
-.end { background-color: rgb(250, 117, 64); }
-.current { background-color: rgba(0, 255, 0, 0.5); transition: background-color 0.2s ease; }
+.cell:hover {
+  background-color: rgba(71, 1, 13, 0.651);
+}
+
+/* Cell Types */
+.room {
+  background-color: rgb(57, 204, 254);
+}
+.obstacle {
+  background-color: gray;
+}
+.lift {
+  background-color: rgb(252, 68, 98);
+}
+.stairs {
+  background-color: lightpink;
+}
+.path {
+  background-color: rgb(112, 239, 112);
+}
+.start {
+  background-color: rgb(244, 117, 214);
+}
+.end {
+  background-color: rgb(250, 117, 64);
+}
+.current {
+  background-color: rgba(0, 255, 0, 0.5);
+  transition: background-color 0.2s ease;
+}
+
+/* Form Section */
+#dataForm {
+  margin-top: 5px;
+  margin-bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dataForm {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  width: 80%;
+  max-width: 1200px;
+}
+
+.dataForm > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  align-items: center;
+}
+
+label {
+  font-weight: bold;
+  color: #333;
+}
+
+input {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 200px;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: #4a90e2;
+}
+input:hover{
+    border-color: #4a90e2;
+}
+
+button[type="submit"] {
+  background-color: #4a90e2;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  margin-top: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #357ab7;
+  transform: scale(1.05);
+}
+
+/* Footer Section */
+h5 {
+  text-align: center;
+  margin-top: 40px;
+  color: #555;
+  font-size: 2rem;
+  font-weight: normal;
+}

@@ -231,14 +231,24 @@ function findShortestPath() {
         } else {
           if (data.best_platform === "stair") {
             console.log("I am stair...");
-            console.log("Ground: ", groundFloorValue, "First: ", firstFloorValue);
+            console.log(
+              "Ground: ",
+              groundFloorValue,
+              "First: ",
+              firstFloorValue
+            );
             time =
               (data.distance - 2) * 5 +
               (Math.abs(firstFloorValue - groundFloorValue) + 1) * 20;
             console.log("Time by Stair: ", time);
           } else if (data.best_platform === "lift") {
             console.log("I am lift...");
-            console.log("Ground: ", groundFloorValue, "First: ", firstFloorValue);
+            console.log(
+              "Ground: ",
+              groundFloorValue,
+              "First: ",
+              firstFloorValue
+            );
             time =
               (data.distance - 2) * 5 +
               (Math.abs(firstFloorValue - groundFloorValue) + 1) * 5;
@@ -350,7 +360,7 @@ function sameFloorNav() {
   const startRoomSelect = document.getElementById("start-room-select");
   const endRoomSelect = document.getElementById("end-room-select");
   const sourceDest = document.getElementById("same-floor-select");
-  document.getElementById("time").innerHTML = `Estimated Time: `;
+  document.getElementById("time").innerHTML = `Estimated Time: --`;
 
   // Clear previous options
   startRoomSelect.innerHTML =
@@ -485,6 +495,11 @@ function updateFloor() {
     document.getElementById("grid-first").style.display = "grid";
 
     // document.getElementById("first-floor").style.display = "block";
+
+    if (startRoom) {
+      mode = "start";
+      cellClicked(startRoom, gridGround);
+    }
 
     showFloors();
     populateRoomDropdowns();
@@ -642,6 +657,18 @@ document
       document.getElementById("field2").value,
       document.getElementById("field3").value,
       document.getElementById("field4").value,
+      document.getElementById("field5").value,
+      document.getElementById("field6").value,
+      document.getElementById("field7").value,
+      document.getElementById("field8").value,
+      document.getElementById("field9").value,
+      document.getElementById("field10").value,
+      document.getElementById("field11").value,
+      document.getElementById("field12").value,
+      document.getElementById("field13").value,
+      document.getElementById("field14").value,
+      document.getElementById("field15").value,
+      document.getElementById("field16").value,
     ];
 
     // Check if all fields contain valid numbers (integers or floats)
@@ -664,11 +691,11 @@ document
       .then((response) => response.json())
       .then((data) => {
         console.log("Success:", data);
-        startRoom = data.index;
+        startRoom = data.index % 100;
 
         if (same_floor) {
           document.getElementById("same-floor-select").value = data.floor + 1;
-          document.getElementById("start-room-select").value = data.index;
+          document.getElementById("start-room-select").value = data.index % 100;
           updateSameFloor();
 
           mode = "start";
@@ -682,7 +709,7 @@ document
           // populateSameRoomDropdowns();
         } else {
           document.getElementById("ground-floor-select").value = data.floor + 1;
-          document.getElementById("start-room-select").value = data.index;
+          document.getElementById("start-room-select").value = data.index % 100;
           updateFloor();
 
           if (groundFloorValue && firstFloorValue) {
@@ -695,6 +722,7 @@ document
           }
         }
         findShortestPath();
+        window.scrollTo({ top: 250, behavior: "smooth" });
         alert("Data submitted successfully!");
       })
       .catch((error) => {
@@ -702,3 +730,10 @@ document
         alert("There was an error submitting the data.");
       });
   });
+
+// window.onload = function () {
+//   window.scrollTo({ top: 0, behavior: "smooth" });
+// };
+window.addEventListener('load', function() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});

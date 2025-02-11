@@ -252,7 +252,7 @@ def get_one_best_pos(positions, r,c):
     
     return best_pos
 
-def find_location(in_signal, grid_size = [5,5], signal_map = loc.cell_signal, ap_pos = loc.ap_pos):
+def find_location(in_signal, grid_size = [10,10], signal_map = loc.cell_signal, ap_pos = loc.ap_pos):
     ''' Given the input strength signals for all 'n' access points in the format [AP1,AP2,AP3,AP4],
     function returns the cell number (on one-dim grid) a user is at currrently.
     '''
@@ -266,8 +266,9 @@ def find_location(in_signal, grid_size = [5,5], signal_map = loc.cell_signal, ap
     for i in range(m):
         val = 0
         for j in range(n):  
-            val+= abs(float(in_signal[j]) - float(signal_map[i+1][j]))
-            
+            # val+= abs(float(in_signal[j]) - float(signal_map[i+1][j]))
+            val+= abs(float(in_signal[j]) - signal_map[i+1][j])
+    
         distance[i+1] = val
         
         # update min
@@ -296,8 +297,8 @@ def submit_form():
     # Extract the fields from the received data
     fields = data.get('fields', [])
 
-    if len(fields) != 4:
-        return jsonify({'error': 'Invalid data. Four fields are required.'}), 400
+    if len(fields) != len(loc.ap_pos):
+        return jsonify({'error': 'Invalid data. Sixteen fields are required.'}), 400
 
     ind, floor = find_location(fields)
     print('index',ind, floor)

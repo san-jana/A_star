@@ -1,5 +1,7 @@
 const gridGround = document.getElementById("grid-ground");
 const gridFirst = document.getElementById("grid-first");
+let same_floor = false;
+let multi_floor = false;
 const rows = 10;
 const cols = 10;
 let mode = "none"; // Modes: 'obstacle', 'room', 'lift', 'stairs', 'start', 'end'
@@ -13,8 +15,11 @@ let obstacles = [22, 27, 32, 37, 42, 47, 52, 57, 62, 67, 72, 77];
 let rooms = [
   0, 2, 7, 9, 20, 29, 40, 49, 50, 59, 70, 79, 90, 92, 94, 95, 97, 99,
 ];
+let withLifts = true;
+let withStairs = true;
 let lift_demo = [23, 33, 66, 76];
 let stairs = [26, 36, 63, 73];
+let time = 0;
 
 function createGrid(gridElement, floorNumber) {
   for (let i = 0; i < rows * cols; i++) {
@@ -79,15 +84,17 @@ function updateButtonStates() {
     !canSelect || startRoom === null;
   document.getElementById("find-path").disabled =
     !canSelect || startRoom === null || endRoom === null;
+  document.getElementById("only-lift").disabled =
+    !canSelect || startRoom === null || endRoom === null || same_floor;
+  document.getElementById("only-stair").disabled =
+    !canSelect || startRoom === null || endRoom === null || same_floor;
+  document.getElementById("reset").disabled =
+    !canSelect || startRoom === null || endRoom === null || same_floor;
 }
 
 // Set the mode and update button states accordingly
 function setMode(selectedMode) {
   mode = selectedMode;
-  document.getElementById("place-obstacles").disabled = mode === "obstacle";
-  document.getElementById("place-rooms").disabled = mode === "room";
-  document.getElementById("place-lifts").disabled = mode === "lift";
-  document.getElementById("place-stairs").disabled = mode === "stairs";
   updateButtonStates();
 }
 
@@ -125,12 +132,10 @@ function cellClicked(index, gridElement) {
       if (prevStart) prevStart.classList.remove("start");
     }
     if (obstacles.includes(index)) {
-      console.log(obstacles);
-
       alert("Invalid positions.");
     } else {
       startRoom = index;
-      console.log(startRoom);
+      console.log("Start room: ", startRoom);
       cell.classList.add("start");
       updateButtonStates();
     }
@@ -140,17 +145,13 @@ function cellClicked(index, gridElement) {
       const prevEnd = gridElement.querySelector(
         `.cell[data-index="${endRoom}"]`
       );
-      console.log(prevEnd);
-
       if (prevEnd) prevEnd.classList.remove("end");
     }
     if (obstacles.includes(index)) {
-      console.log(obstacles);
-
       alert("Invalid positions.");
     } else {
       endRoom = index;
-      console.log(endRoom);
+      console.log("End room: ", endRoom);
       cell.classList.add("end");
       updateButtonStates();
     }
@@ -197,9 +198,11 @@ function findShortestPath() {
         if (data.error) {
           alert(data.error);
         } else {
-          console.log("error in animation");
-          console.log(data);
-
+          time = data.distance * 5;
+          console.log("Time on same floor: ", time);
+          document.getElementById(
+            "time"
+          ).innerHTML = `Estimated Time: ${convertToMinSec(time)}`;
           animatePathfinding(data);
         }
       })
@@ -216,8 +219,8 @@ function findShortestPath() {
       body: JSON.stringify({
         start: startRoom,
         end: endRoom,
-        lifts: lift_demo,
-        stairs: stairs,
+        lifts: withLifts ? lift_demo : [],
+        stairs: withStairs ? stairs : [],
         obstacles: obstacles_dummy,
       }),
     })
@@ -226,6 +229,24 @@ function findShortestPath() {
         if (data.error) {
           alert(data.error);
         } else {
+          if (data.best_platform === "stair") {
+            console.log("I am stair...");
+            console.log("Ground: ", groundFloorValue, "First: ", firstFloorValue);
+            time =
+              (data.distance - 2) * 5 +
+              (Math.abs(firstFloorValue - groundFloorValue) + 1) * 20;
+            console.log("Time by Stair: ", time);
+          } else if (data.best_platform === "lift") {
+            console.log("I am lift...");
+            console.log("Ground: ", groundFloorValue, "First: ", firstFloorValue);
+            time =
+              (data.distance - 2) * 5 +
+              (Math.abs(firstFloorValue - groundFloorValue) + 1) * 5;
+            console.log("Time by Lift: ", time);
+          }
+          document.getElementById(
+            "time"
+          ).innerHTML = `Estimated Time: ${convertToMinSec(time)}`;
           animatePathfinding(data);
         }
       })
@@ -233,6 +254,20 @@ function findShortestPath() {
         console.error("Error:", error);
         alert("An error occurred while finding the path.");
       });
+  }
+}
+function convertToMinSec(seconds) {
+  let minutes = Math.floor(seconds / 60); // Get the whole number of minutes
+  let remainingSeconds = seconds % 60; // Get the remaining seconds
+
+  if (minutes > 0 && remainingSeconds > 0) {
+    return `${minutes} min ${remainingSeconds} sec`;
+  } else if (minutes > 0) {
+    return `${minutes} min`;
+  } else if (remainingSeconds > 0) {
+    return `${remainingSeconds} sec`;
+  } else {
+    return "0 sec"; // If the input is 0 seconds
   }
 }
 
@@ -302,10 +337,35 @@ function showFloors() {
 }
 
 function sameFloorNav() {
+  same_floor = true;
+  multi_floor = false;
+  groundFloorValue = null;
+  firstFloorValue = null;
+  startRoom = null;
+  endRoom = null;
   const same = document.getElementById("same-floor-nav");
   const multi = document.getElementById("multi-floor-nav");
   const floorsDiv = document.getElementById("floors");
   const roomSelect = document.getElementById("room-selection");
+  const startRoomSelect = document.getElementById("start-room-select");
+  const endRoomSelect = document.getElementById("end-room-select");
+  const sourceDest = document.getElementById("same-floor-select");
+  document.getElementById("time").innerHTML = `Estimated Time: `;
+
+  // Clear previous options
+  startRoomSelect.innerHTML =
+    '<option value="" disabled selected>Select a room</option>';
+  endRoomSelect.innerHTML =
+    '<option value="" disabled selected>Select a room</option>';
+  sourceDest.innerHTML = `<option value="" disabled selected>Select a floor</option>
+          <option value="1">Floor 1</option>
+          <option value="2">Floor 2</option>
+          <option value="3">Floor 3</option>
+          <option value="4">Floor 4</option>
+          <option value="5">Floor 5</option>
+          <option value="6">Floor 6</option>
+          <option value="7">Floor 7</option>
+          <option value="8">Floor 8</option>`;
 
   floorsDiv.style.display = "none";
   roomSelect.style.display = "block";
@@ -320,10 +380,45 @@ function sameFloorNav() {
 }
 
 function multiFloorNav() {
+  multi_floor = true;
+  same_floor = false;
+  groundFloorValue = null;
+  firstFloorValue = null;
+  startRoom = null;
+  endRoom = null;
   const same = document.getElementById("same-floor-nav");
   const multi = document.getElementById("multi-floor-nav");
   const floorsDiv = document.getElementById("floors");
   const roomSelect = document.getElementById("room-selection");
+  const startRoomSelect = document.getElementById("start-room-select");
+  const endRoomSelect = document.getElementById("end-room-select");
+  const groundFloorSelect = document.getElementById("ground-floor-select");
+  const firstFloorSelect = document.getElementById("first-floor-select");
+  document.getElementById("time").innerHTML = `Estimated Time: `;
+
+  // Clear previous options
+  startRoomSelect.innerHTML =
+    '<option value="" disabled selected>Select a room</option>';
+  endRoomSelect.innerHTML =
+    '<option value="" disabled selected>Select a room</option>';
+  groundFloorSelect.innerHTML = `<option value="" disabled selected>Select a floor</option>
+          <option value="1">Floor 1</option>
+          <option value="2">Floor 2</option>
+          <option value="3">Floor 3</option>
+          <option value="4">Floor 4</option>
+          <option value="5">Floor 5</option>
+          <option value="6">Floor 6</option>
+          <option value="7">Floor 7</option>
+          <option value="8">Floor 8</option>`;
+  firstFloorSelect.innerHTML = `<option value="" disabled selected>Select a floor</option>
+          <option value="1">Floor 1</option>
+          <option value="2">Floor 2</option>
+          <option value="3">Floor 3</option>
+          <option value="4">Floor 4</option>
+          <option value="5">Floor 5</option>
+          <option value="6">Floor 6</option>
+          <option value="7">Floor 7</option>
+          <option value="8">Floor 8</option>`;
 
   roomSelect.style.display = "block";
   floorsDiv.style.display = "none";
@@ -339,10 +434,29 @@ function multiFloorNav() {
   }
 }
 
+function setLift() {
+  withStairs = false;
+  withLifts = true;
+}
+
+function setStair() {
+  withLifts = false;
+  withStairs = true;
+}
+
+function reset() {
+  withLifts = true;
+  withStairs = true;
+}
+
 function updateFloor() {
   // Get the selected values from the dropdown menus
   groundFloorValue = document.getElementById("ground-floor-select").value;
   firstFloorValue = document.getElementById("first-floor-select").value;
+
+  if (groundFloorValue) {
+    populateRoomDropdowns();
+  }
 
   // If both floors have been selected, update the floor displays and show grids
   if (groundFloorValue && firstFloorValue) {
@@ -429,10 +543,6 @@ function populateSameRoomDropdowns() {
     roomOption.textContent = `Room ${
       parseInt(groundFloorValue) * 100 + (rooms.indexOf(room) + 1)
     }`;
-    console.log(
-      parseInt(groundFloorValue) * 100 + (rooms.indexOf(room) + 1),
-      parseInt(groundFloorValue)
-    );
 
     // Add room to start room selects
     startRoomSelect.appendChild(roomOption.cloneNode(true));
@@ -453,6 +563,8 @@ function populateSameRoomDropdowns() {
   startRoomSelect.addEventListener("change", () => {
     // Assuming rooms are indexed the same as cell numbers
     mode = "start";
+    // console.log("this is me", gridGround);
+
     cellClicked(parseInt(startRoomSelect.value, 10), gridGround); // Call your cellClicked function here
     // mode = 'none';
   });
@@ -487,11 +599,6 @@ function populateRoomDropdowns() {
       parseInt(groundFloorValue) * 100 + (rooms.indexOf(room) + 1)
     }`;
 
-    console.log(
-      parseInt(groundFloorValue) * 100 + (rooms.indexOf(room) + 1),
-      parseInt(groundFloorValue)
-    );
-
     // Add room to start room selects
     startRoomSelect.appendChild(roomOption.cloneNode(true));
   });
@@ -524,46 +631,74 @@ function populateRoomDropdowns() {
 }
 
 // Handling user input of signal strength
-document.getElementById("dataForm").addEventListener("submit", function(event) {
-  event.preventDefault();  // Prevent the form from submitting normally
+document
+  .getElementById("dataForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent the form from submitting normally
 
-  // Collect the form data into an array
-  let data = [
+    // Collect the form data into an array
+    let data = [
       document.getElementById("field1").value,
       document.getElementById("field2").value,
       document.getElementById("field3").value,
-      document.getElementById("field4").value
-  ];
+      document.getElementById("field4").value,
+    ];
 
-   // Check if all fields contain valid numbers (integers or floats)
-   for (let i = 0; i < data.length; i++) {
-    let trimmedValue = data[i].trim();
-    if (isNaN(trimmedValue) || trimmedValue === "") {
-      alert(`Please enter a valid number in router ${i + 1}.`);
-      return;  // Stop processing further if validation fails
+    // Check if all fields contain valid numbers (integers or floats)
+    for (let i = 0; i < data.length; i++) {
+      let trimmedValue = data[i].trim();
+      if (isNaN(trimmedValue) || trimmedValue === "") {
+        alert(`Please enter a valid number in router ${i + 1}.`);
+        return; // Stop processing further if validation fails
+      }
     }
-  }
-  console.log(data);
-  
 
-  // Send the data to the backend via a POST request
-  fetch('/submit-form', {
-      method: 'POST',
+    // Send the data to the backend via a POST request
+    fetch("/submit-form", {
+      method: "POST",
       headers: {
-          'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ fields: data })  // Send the data as an array in JSON format
-  })
-  .then(response => response.json())
-  .then(data => {
-      console.log('Success:', data);
-      startRoom = data.index;
-      findShortestPath()
-      alert('Data submitted successfully!');
-  })
-  .catch((error) => {
-      console.error('Error:', error);
-      alert('There was an error submitting the data.');
-  });
-});
+      body: JSON.stringify({ fields: data }), // Send the data as an array in JSON format
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+        startRoom = data.index;
 
+        if (same_floor) {
+          document.getElementById("same-floor-select").value = data.floor + 1;
+          document.getElementById("start-room-select").value = data.index;
+          updateSameFloor();
+
+          mode = "start";
+          cellClicked(startRoom, gridGround); // Call your cellClicked function here
+
+          if (endRoom) {
+            mode = "end";
+            cellClicked(endRoom, gridGround); // Call your cellClicked function here
+          }
+          // console.log("Value from same floor:",gridGround.querySelector(`.cell[data-index="${data.index}"]`));
+          // populateSameRoomDropdowns();
+        } else {
+          document.getElementById("ground-floor-select").value = data.floor + 1;
+          document.getElementById("start-room-select").value = data.index;
+          updateFloor();
+
+          if (groundFloorValue && firstFloorValue) {
+            mode = "start";
+            cellClicked(startRoom, gridGround); // Call your cellClicked function here
+            if (endRoom) {
+              mode = "end";
+              cellClicked(endRoom, gridFirst); // Call your cellClicked function here
+            }
+          }
+        }
+        findShortestPath();
+        alert("Data submitted successfully!");
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("There was an error submitting the data.");
+      });
+  });

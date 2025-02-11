@@ -89,6 +89,7 @@ def same_floor_path():
     # Return the shortest path and lift
     return jsonify({
         'ground': path, 
+        'distance': len(path)
     })
 
 # multi-floor navigation
@@ -101,11 +102,13 @@ def multi_floor_path():
     stairs = data.get('stairs', [])  # List of lifts' indices
     obstacles = data.get('obstacles', [])  # List of obstacles
     
-    if start is None or end is None or not lifts:
+    if start is None or end is None:
         return jsonify({'error': 'Invalid positions.'}), 400
 
     best_path = None
     min_distance = float('inf')
+    platform = ''
+
     min_distance_lift = float('inf')
     best_path_lift = None
     best_lift = None
@@ -169,17 +172,19 @@ def multi_floor_path():
     if min_distance_lift < min_distance_stair:
         best_path = best_path_lift
         min_distance = min_distance_lift
+        platform = 'lift'
 
     else:
         best_path = best_path_stair
         min_distance = min_distance_stair
+        platform = 'stair'
 
-    if best_path is None:
+    if best_path is None or platform == '':
         return jsonify({'error': 'No valid path found between start and end through lifts.'}), 404
 
     # Return the shortest path and lift
     return jsonify({
-        'best_lift': best_lift,
+        'best_platform': platform,
         'shortest_path': best_path,
         'distance': min_distance,
         'ground': best_path['ground'], 

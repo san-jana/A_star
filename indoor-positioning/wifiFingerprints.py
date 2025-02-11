@@ -1,26 +1,49 @@
-ap_pos = {1:1,2:5,3:21,4:25}
+# dimensions and floor levels
+grid_size = 10
 
-cell_signal = {i: [0, 0, 0, 0] for i in range(1, 51)}
+# 16 aps on floors 1,3,5,7, AP positioning
+ap_positions = {
+    1: (0, 2, 2),  2: (0, 2, 7),  3: (0, 7, 2),  4: (0, 7, 7),
+    5: (2, 2, 2),  6: (2, 2, 7),  7: (2, 7, 2),  8: (2, 7, 7),
+    9: (4, 2, 2), 10: (4, 2, 7), 11: (4, 7, 2), 12: (4, 7, 7),
+    13: (6, 2, 2), 14: (6, 2, 7), 15: (6, 7, 2), 16: (6, 7, 7)
+}
 
-cell_signal[2] = [90,40,20,5]
-cell_signal[6] = [90,20,40,5]
+# simulating signals using Manhattan distance
+def manhattan_distance(x1, y1, x2, y2):
+    return abs(x1 - x2) + abs(y1 - y2)
 
-cell_signal[16] = [40,5,90,20]
-cell_signal[22] = [20,5,90,40]
+# storing signal strength for all floors
+cell_signal = {}
 
-cell_signal[24] = [5,20,40,90]
-cell_signal[20] = [5,40,20,90]
+for floor in range(8):  # floors 0 to 7 (0-based index)
+    filtered_indices = [i for i in range(floor * 100 + 11, (floor + 1) * 100, 2)]
+    
+    floor_signal = {}
 
-cell_signal[10] = [20,90,5,40]
-cell_signal[4] = [40,90,5,20]
+    for index in filtered_indices:
+        r, c = divmod(index % 100, grid_size)  # row, col from floor-local index
+        floor_signal[index] = []
 
-cell_signal[13] = [20,20,20,20]
+        for ap, (ap_floor, ap_r, ap_c) in ap_positions.items():
+            dist = manhattan_distance(r, c, ap_r, ap_c)  #calc distance
+            signal = max(100 - (dist * 5), 0)  # calc signal strength
+            
+            # signal from AP for each floor reduces by 10
+            floor_diff = abs(floor - ap_floor)  
+            signal = max(signal - (floor_diff * 10), 0)
+            
+            floor_signal[index].append(signal)
+    
+    cell_signal[floor] = floor_signal
 
-# floor 2
+# print results
+# for floor in cell_signal:
+#     print(f"Floor {floor}:")
+#     for i in sorted(cell_signal[floor].keys()):
+#         print(f"  Cell {i}: {cell_signal[floor][i]}")
 
-cell_signal[32] = [60,10,10,0]
-cell_signal[34] = [10,60,0,10]
-cell_signal[42] = [10,0,60,10]
-cell_signal[44] = [0,10,10,60]
 
-cell_signal[38] = [5,5,5,5]
+
+
+

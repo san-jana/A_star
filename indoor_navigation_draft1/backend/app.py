@@ -282,7 +282,7 @@ def find_location(in_signal, grid_size = [10,10], signal_map = loc.cell_signal, 
     if len(best_pos) > 1:
         r = grid_size[0]
         c = grid_size[1]
-        single_best_pos = get_one_best_pos(best_pos, r,c)
+        single_best_pos = best_pos[get_one_best_pos(best_pos, r,c)]
     else:
         single_best_pos = best_pos[0]
 
